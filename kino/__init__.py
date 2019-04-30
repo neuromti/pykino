@@ -42,9 +42,6 @@ class FileHandler(FileSystemEventHandler):
     
     def on_created(self, event):
         self.created_files.append(event.src_path)
-    
-    def on_modified(self, event):
-        print(event)
         
 class KinoWatcher():
 
