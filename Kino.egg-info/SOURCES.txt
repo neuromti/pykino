@@ -1,0 +1,6 @@
+setup.py
+Kino.egg-info/PKG-INFO
+Kino.egg-info/SOURCES.txt
+Kino.egg-info/dependency_links.txt
+Kino.egg-info/top_level.txt
+kino/__init__.py
