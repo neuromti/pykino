@@ -11,6 +11,7 @@ from typing import Callable, List
 import configparser
 import os
 from threading import Barrier, Thread
+from shutil import copyfile
 #%%
 def lock_until_file_is_safe(filename):
     isrecording = True
@@ -87,10 +88,30 @@ class KinoLogger():
             self.logfile.write(file) 
         
     
-    def __init__(self, fname=r'C:\projects\kinovea\logfile.ini'):
-        self.fname = fname 
+    def __init__(self, logpath=os.path.expanduser('~\Desktop\\recording'),
+                 inifile=os.path.expanduser('~\Desktop\info.ini')):                
+        # create log directory
+        os.makedirs(logpath, exist_ok=True)        
+        self.logpath = logpath
+        
+        #read ini file
+        ini = configparser.ConfigParser()
+        ini.read(inifile)        
+        ID = ini.get('Info','id')
+        fname = ID + '_' + datetime.now().strftime("%Y%m%d-%H%M") + '.ini'        
+
+        # initalize logfile        
+        self.fname = os.path.join(self.logpath, fname)        
         self.logfile = configparser.ConfigParser()
-        self.logfile.add_section('Info')
+        if os.path.exists(self.fname):
+            self.logfile.read(self.fname)
+        self.update_file()
+        if not self.logfile.has_section('Info'):
+            self.logfile.add_section('Info')
+            for key in ini.options('Info'):
+                val = ini.get('Info', key)
+                self.logfile.set('Info', key, val)
+        self.update_file()
         
     def new_recording(self, moviefiles:List[str]):
         self.logfile.add_section('Filenames')
@@ -110,20 +131,22 @@ class KinoLogger():
         else:
             raise FileNotFoundError('Movies have not started in sync: Restart')
             
-    def set_info(self, key:str='Name', val:str='Unknown'):
-        self.logfile.set('Info', key, val)
-    
-        
     def log(self, msg:str):
         key = self.get_current_time()      
         val = sanitize_string(msg)    
         self.logfile.set(self.current_section, key, val)
         self.update_file()
   
+    def dump(self):
+        for source in self.moviefiles:
+            destination = os.path.join(self.logpath, os.path.split(source)[1])
+            copyfile(source, destination)
+    
+    
     @classmethod
     def get_current_time(cls):
         """return time as string similar to kinovea file format
         i.e. YearMonthDay - HourMinutesSeconds.Milliseconds        
         """
-        return datetime.now().strftime("%H:%M:%S.%f")
+        return datetime.now().strftime("%Y%m%d-%H%M%S.%f")
 # %%
