@@ -48,6 +48,7 @@ class KinoWatcher():
 
     def __init__(self, path=r'C:\projects\kinovea'):
         self.path = path 
+        self.files = None
             
     def wait_start(self, show:Callable=None, number=2):
         handler = FileHandler()        
@@ -64,7 +65,10 @@ class KinoWatcher():
         self.files = handler.created_files
         return self.files
 
-    def wait_finish(self, show:Callable=None):
+    def wait_finish(self, show:Callable=None):        
+        if self.files is None:
+            return
+        
         def lock(f, b):
             lock_until_file_is_safe(f)
             b.wait()
