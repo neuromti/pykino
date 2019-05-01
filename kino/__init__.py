@@ -60,6 +60,7 @@ class KinoWatcher():
                 time.sleep(.1)                
             else:
                 show()
+                time.sleep(.1) 
         self.observer.stop()
         self.observer.join()
         self.files = handler.created_files
@@ -120,9 +121,9 @@ class KinoLogger():
     def new_recording(self, moviefiles:List[str]):
                        
         self.moviefiles = moviefiles
-        m = moviefiles[0]
+        m = moviefiles[-2]
         secA = os.path.splitext(os.path.split(m)[1])[0].split('_')[1]
-        m = moviefiles[1]
+        m = moviefiles[-1]
         secB = os.path.splitext(os.path.split(m)[1])[0].split('_')[1]
         if secB == secA:
             self.current_section = secA
