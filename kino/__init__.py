@@ -98,7 +98,7 @@ class KinoLogger():
         ini = configparser.ConfigParser()
         ini.read(inifile)        
         ID = ini.get('Info','id')
-        fname = ID + '_' + datetime.now().strftime("%Y%m%d-%H%M") + '.ini'        
+        fname = ID + '_' + datetime.now().strftime("%Y%m%d") + '.ini'        
 
         # initalize logfile        
         self.fname = os.path.join(self.logpath, fname)        
@@ -114,11 +114,7 @@ class KinoLogger():
         self.update_file()
         
     def new_recording(self, moviefiles:List[str]):
-        self.logfile.add_section('Filenames')
-        for i, m in enumerate(moviefiles):
-            self.logfile.set('Filenames', str(i), m)
-            self.update_file()
-        
+                       
         self.moviefiles = moviefiles
         m = moviefiles[0]
         secA = os.path.splitext(os.path.split(m)[1])[0].split('_')[1]
@@ -128,6 +124,10 @@ class KinoLogger():
             self.current_section = secA
             self.logfile.add_section(self.current_section)
             self.update_file()
+            for i, m in enumerate(moviefiles):
+                self.logfile.set(self.current_section, f'rawfile_{i}', m)
+                self.update_file()
+
         else:
             raise FileNotFoundError('Movies have not started in sync: Restart')
             
