@@ -142,6 +142,13 @@ class KinoLogger():
         self.logfile.set(self.current_section, key, val)
         self.update_file()
   
+    
+    def add_log(self, key:str, val:str):
+        key = sanitize_string(key)         
+        val = sanitize_string(val)    
+        self.logfile.set(self.current_section, key, val)
+        self.update_file()
+  
     def dump(self):
         for source in self.moviefiles:
             destination = os.path.join(self.logpath, os.path.split(source)[1])
