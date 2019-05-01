@@ -55,21 +55,21 @@ class KinoWatcher():
         self.observer = Observer()
         self.observer.schedule(handler, self.path, recursive=True)
         self.observer.start()        
-        while not len(handler.created_files)>=number:
+        #sleep before to give the file system time to dispatch the event for more than one file
+        time.sleep(.1)  
+        while not len(handler.created_files)>=number:                        
+            time.sleep(.1) 
             if show is None:
-                time.sleep(.1)                
+                pass
             else:
                 show()
-                time.sleep(.1) 
+            
         self.observer.stop()
         self.observer.join()
-        self.files = handler.created_files
-        return self.files
+        self.files = handler.created_files.copy()
+        return self.files[-number:]
 
-    def wait_finish(self, show:Callable=None):        
-        if self.files is None:
-            return
-        
+    def wait_finish(self, show:Callable=None):                
         def lock(f, b):
             lock_until_file_is_safe(f)
             b.wait()
@@ -79,6 +79,7 @@ class KinoWatcher():
             t = Thread(target=lock, args=(filename, barrier, ))
             t.start()
         barrier.wait()
+        time.sleep(0.5) # just to be sure that the file has been given free
         return True
         
 
@@ -149,7 +150,7 @@ class KinoLogger():
         self.logfile.set(self.current_section, key, val)
         self.update_file()
   
-    def dump(self):
+    def dump(self):        
         for source in self.moviefiles:
             destination = os.path.join(self.logpath, os.path.split(source)[1])
             copyfile(source, destination)
